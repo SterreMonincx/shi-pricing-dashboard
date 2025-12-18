@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHI Pricing & Margin Optimizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --shi-red: #e2231a;
+            --shi-red-dark: #c41e17;
+            --shi-red-light: rgba(226, 35, 26, 0.1);
+            --shi-dark: #2e2a25;
+            --shi-gold: #f5b800;
+            --shi-gold-light: rgba(245, 184, 0, 0.15);
+            --shi-gray: #f8f8f8;
+            --shi-gray-border: #e5e5e5;
+            --white: #ffffff;
+            --positive: #22c55e;
+            --negative: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--shi-gray);
+            color: var(--shi-dark);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .header-title {
+            border-left: 2px solid var(--shi-gray-border);
+            padding-left: 1rem;
+            margin-left: 0.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--shi-dark);
+        }
+
+        .header-title span {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--shi-gray);
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .nav-tab {
+            padding: 0.625rem 1.5rem;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            color: var(--shi-dark);
+        }
+
+        .nav-tab:hover {
+            background: rgba(226, 35, 26, 0.1);
+        }
+
+        .nav-tab.active {
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--shi-red);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--shi-red-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--shi-gray-border);
+            color: var(--shi-dark);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--shi-red);
+            color: var(--shi-red);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Dashboard Title Section */
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--shi-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .date-range {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .date-range::before {
+            content: '◆';
+            color: var(--shi-red);
+            margin-right: 0.25rem;
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--shi-red);
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-card.highlight {
+            border-left-color: var(--shi-gold);
+            background: linear-gradient(135deg, var(--white) 0%, var(--shi-gold-light) 100%);
+        }
+
+        .kpi-card.success {
+            border-left-color: var(--positive);
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--shi-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .kpi-change {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .kpi-change.positive {
+            color: var(--positive);
+        }
+
+        .kpi-change.negative {
+            color: var(--negative);
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Component */
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--shi-gray-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--shi-red);
+            border-radius: 2px;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 0.875rem 1rem;
+            background: var(--shi-gray);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            font-weight: 600;
+            border-bottom: 2px solid var(--shi-gray-border);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--shi-gray-border);
+            font-size: 0.875rem;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--shi-red-light);
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .customer-name {
+            font-weight: 500;
+            color: var(--shi-dark);
+        }
+
+        .amount {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-weight: 500;
+        }
+
+        .margin-badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .margin-badge.high {
+            background: rgba(34, 197, 94, 0.15);
+            color: #16a34a;
+        }
+
+        .margin-badge.medium {
+            background: var(--shi-gold-light);
+            color: #b8860b;
+        }
+
+        .margin-badge.low {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+        }
+
+        /* Product Group List */
+        .product-list {
+            list-style: none;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid var(--shi-gray-border);
+            transition: background 0.2s ease;
+        }
+
+        .product-item:hover {
+            background: var(--shi-gray);
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .product-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--shi-red-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .product-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .product-count {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .product-revenue {
+            text-align: right;
+        }
+
+        .product-revenue .amount {
+            font-size: 0.9rem;
+        }
+
+        .product-revenue .percentage {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--shi-gray);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--shi-red);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        /* Insights Section */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 992px) {
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .insight-card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .insight-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--shi-red-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .insight-card.gold .insight-icon {
+            background: var(--shi-gold-light);
+        }
+
+        .insight-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--shi-dark);
+        }
+
+        .insight-text {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--shi-red);
+            color: var(--white);
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .footer p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* Animated elements */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .kpi-card, .card, .insight-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.15s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.2s; }
+        .kpi-card:nth-child(4) { animation-delay: 0.25s; }
+        .kpi-card:nth-child(5) { animation-delay: 0.3s; }
+
+        /* Filter Pills */
+        .filter-pills {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            padding: 0.375rem 0.875rem;
+            background: var(--shi-gray);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .pill:hover {
+            background: var(--shi-red-light);
+            border-color: var(--shi-red);
+        }
+
+        .pill.active {
+            background: var(--shi-red);
+            color: var(--white);
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            background: linear-gradient(135deg, var(--shi-gold) 0%, #f0a800 100%);
+            color: var(--shi-dark);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-text {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 283.53 293.03">
+                <defs><style>.cls-1{fill:#2e2a25;}.cls-2{fill:#fff;}.cls-3{fill:#e2231a;}</style></defs>
+                <g id="non-food"><path class="cls-1" d="M0,283.06V258.3H4.5v2.47a6,6,0,0,1,2.21-2,6.43,6.43,0,0,1,3-.68,5.11,5.11,0,0,1,4.06,1.52,6.84,6.84,0,0,1,1.33,4.62v18.88H10.54V266.42A6.29,6.29,0,0,0,9.88,263a2.63,2.63,0,0,0-2.27-.9,2.78,2.78,0,0,0-2.29.94,4.36,4.36,0,0,0-.77,2.81v17.21Z" transform="translate(0.04 0)"/><path class="cls-1" d="M19.33,270.64q0-6.25,2.14-9.52a7,7,0,0,1,6.2-3.27,6.94,6.94,0,0,1,6.2,3.27Q36,264.38,36,270.64t-2.14,9.59a6.94,6.94,0,0,1-6.2,3.28,6.94,6.94,0,0,1-6.2-3.28Q19.33,277,19.33,270.64Zm4.63,0a18.14,18.14,0,0,0,.9,6.65,3,3,0,0,0,2.82,2.11,3,3,0,0,0,2.87-2.12,24.24,24.24,0,0,0,0-13.25,3,3,0,0,0-2.87-2.12A3,3,0,0,0,24.85,264,18.07,18.07,0,0,0,24,270.59Z" transform="translate(0.04 0)"/><path class="cls-1" d="M40.46,283.06V258.3H45v2.47a6,6,0,0,1,2.21-2,6.43,6.43,0,0,1,3-.68,5.11,5.11,0,0,1,4.06,1.52,6.85,6.85,0,0,1,1.33,4.62v18.88H51V266.42a6.28,6.28,0,0,0-.66-3.43,2.63,2.63,0,0,0-2.27-.9,2.78,2.78,0,0,0-2.29.94,4.37,4.37,0,0,0-.77,2.81v17.21Z" transform="translate(0.04 0)"/><path class="cls-1" d="M60.17,272.71v-4.06H70.45v4.06Z" transform="translate(0.04 0)"/><path class="cls-1" d="M75.53,283.06V261.81H73.06V258.3h2.48v-8.68A6.74,6.74,0,0,1,77,245.07a4.86,4.86,0,0,1,3.91-1.66,7.43,7.43,0,0,1,1.31.13,14.1,14.1,0,0,1,1.64.44v4.14a6.16,6.16,0,0,0-.94-.25,4.43,4.43,0,0,0-.79-.08,1.8,1.8,0,0,0-1.5.59,3.09,3.09,0,0,0-.47,1.91v8h3.41v3.51H80.13v21.25Z" transform="translate(0.04 0)"/><path class="cls-1" d="M85.19,270.64q0-6.25,2.14-9.52a7.52,7.52,0,0,1,12.41,0q2.14,3.27,2.14,9.52t-2.14,9.59a7.5,7.5,0,0,1-12.41,0Q85.18,277,85.19,270.64Zm4.62,0a18.13,18.13,0,0,0,.9,6.65,3,3,0,0,0,2.82,2.11,3,3,0,0,0,2.87-2.12,24.21,24.21,0,0,0,0-13.25,3,3,0,0,0-2.87-2.12A3,3,0,0,0,90.71,264,18.06,18.06,0,0,0,89.81,270.59Z" transform="translate(0.04 0)"/><path class="cls-1" d="M105,270.64q0-6.25,2.14-9.52a7.53,7.53,0,0,1,12.41,0q2.13,3.27,2.14,9.52t-2.14,9.59a7.51,7.51,0,0,1-12.41,0Q105,277,105,270.64Zm4.62,0a18.13,18.13,0,0,0,.9,6.65,3,3,0,0,0,2.82,2.11,3,3,0,0,0,2.87-2.12,24.21,24.21,0,0,0,0-13.25,3,3,0,0,0-2.87-2.12,3,3,0,0,0-2.82,2.11A18.06,18.06,0,0,0,109.62,270.59Z" transform="translate(0.04 0)"/><path class="cls-1" d="M136.36,283.06v-2.42a6.31,6.31,0,0,1-2.13,2.18,5.43,5.43,0,0,1-2.77.69,5.07,5.07,0,0,1-4.82-3.12q-1.54-3.12-1.54-9.68t1.54-9.7a5.07,5.07,0,0,1,4.82-3.12,5.51,5.51,0,0,1,2.79.69,6,6,0,0,1,2.11,2.14V243.94h4.55v39.12Zm-6.67-12.34a19.42,19.42,0,0,0,.79,6.65,2.76,2.76,0,0,0,5.25,0,28.63,28.63,0,0,0,0-13.32,2.76,2.76,0,0,0-5.25,0A19.54,19.54,0,0,0,129.69,270.71Z" transform="translate(0.04 0)"/><path class="cls-1" d="M166,282.65a10.09,10.09,0,0,1-1.87.68,7.48,7.48,0,0,1-1.87.23,5.92,5.92,0,0,1-5.52-3.12q-1.78-3.12-1.78-9.73,0-6.33,1.8-9.6a5.69,5.69,0,0,1,5.25-3.27,8.65,8.65,0,0,1,2,.24,9.31,9.31,0,0,1,1.95.72v4.36a4.69,4.69,0,0,0-1.24-.88,3,3,0,0,0-1.26-.28,3.15,3.15,0,0,0-2.95,2.22,17.58,17.58,0,0,0-1,6.69,15.09,15.09,0,0,0,.95,6.13,3,3,0,0,0,2.87,2,3.48,3.48,0,0,0,1.33-.26A4.65,4.65,0,0,0,166,278Z" transform="translate(0.04 0)"/><path class="cls-1" d="M168.22,270.64q0-6.25,2.14-9.52a7.52,7.52,0,0,1,12.41,0q2.14,3.27,2.14,9.52t-2.14,9.59a7.5,7.5,0,0,1-12.41,0Q168.22,277,168.22,270.64Zm4.63,0a18.14,18.14,0,0,0,.9,6.65,3,3,0,0,0,2.82,2.11,3,3,0,0,0,2.87-2.12,24.24,24.24,0,0,0,0-13.25,3,3,0,0,0-2.87-2.12,3,3,0,0,0-2.82,2.11A18.08,18.08,0,0,0,172.85,270.59Z" transform="translate(0.04 0)"/><path class="cls-1" d="M189.35,283.06V258.3h4.5v2.47a6,6,0,0,1,2.21-2,6.43,6.43,0,0,1,3-.68,5.12,5.12,0,0,1,4.06,1.52,6.85,6.85,0,0,1,1.33,4.62v18.88h-4.57V266.42a6.28,6.28,0,0,0-.66-3.43,2.62,2.62,0,0,0-2.27-.9,2.78,2.78,0,0,0-2.29.94,4.37,4.37,0,0,0-.77,2.81v17.21Z" transform="translate(0.04 0)"/><path class="cls-1" d="M219.68,282.65a10.07,10.07,0,0,1-1.87.68,7.54,7.54,0,0,1-1.87.23,5.92,5.92,0,0,1-5.52-3.12q-1.78-3.12-1.78-9.73,0-6.33,1.8-9.6a5.68,5.68,0,0,1,5.25-3.27,8.59,8.59,0,0,1,2,.24,9.24,9.24,0,0,1,1.95.72v4.36a4.65,4.65,0,0,0-1.24-.88,3,3,0,0,0-1.26-.28,3.15,3.15,0,0,0-2.94,2.22,17.45,17.45,0,0,0-1,6.69,15.14,15.14,0,0,0,.95,6.13,3,3,0,0,0,2.87,2,3.46,3.46,0,0,0,1.32-.26,4.59,4.59,0,0,0,1.28-.82Z" transform="translate(0.04 0)"/><path class="cls-1" d="M237.26,274.78v.33a9,9,0,0,1-2,6.16,6.79,6.79,0,0,1-5.38,2.25,6.67,6.67,0,0,1-6.1-3.09q-1.94-3.09-1.94-9.88,0-6.39,1.94-9.54a6.39,6.39,0,0,1,5.85-3.15q4.17,0,6,2.86t1.85,9.38v1.44H226.17v.73a13.32,13.32,0,0,0,.89,5.64,2.94,2.94,0,0,0,2.8,1.75,2.62,2.62,0,0,0,2.34-1.21,7.11,7.11,0,0,0,.87-3.63ZM226.17,268h7v-.63a9,9,0,0,0-.81-4.42,2.79,2.79,0,0,0-2.6-1.36,2.85,2.85,0,0,0-2.64,1.63A10.12,10.12,0,0,0,226.17,268Z" transform="translate(0.04 0)"/><path class="cls-1" d="M241.63,293V258.3h4.57v2.37a6.06,6.06,0,0,1,2.11-2.15,5.54,5.54,0,0,1,2.79-.68,5.08,5.08,0,0,1,4.82,3.12q1.55,3.11,1.55,9.67t-1.55,9.71a5.09,5.09,0,0,1-4.82,3.12,5.37,5.37,0,0,1-2.77-.71,6.52,6.52,0,0,1-2.14-2.17V293Zm4.4-22.39a19.31,19.31,0,0,0,.8,6.67,2.77,2.77,0,0,0,5.27,0,28.76,28.76,0,0,0,0-13.32,2.78,2.78,0,0,0-5.27,0A19.26,19.26,0,0,0,246,270.64Z" transform="translate(0.04 0)"/><path class="cls-1" d="M262.41,283.06v-21.4h-2.48V258.3h2.48v-6.71H267v6.71h3.41v3.36H267v21.4Z" transform="translate(0.04 0)"/><path class="cls-1" d="M272.09,277.83a7.69,7.69,0,0,0,1.91,1.25,4.74,4.74,0,0,0,1.93.42,3.28,3.28,0,0,0,2.35-.86,2.88,2.88,0,0,0,.91-2.19q0-1.59-2.5-4c-.22-.22-.39-.38-.5-.48a17.56,17.56,0,0,1-3.26-3.81,6.78,6.78,0,0,1-.83-3.33,7,7,0,0,1,1.92-5.1,6.65,6.65,0,0,1,5-2,8,8,0,0,1,2,.25,9,9,0,0,1,1.93.76v4.67a4.8,4.8,0,0,0-1.61-1.26,4.75,4.75,0,0,0-2-.4,2.84,2.84,0,0,0-2.08.81,2.75,2.75,0,0,0-.82,2q0,1.64,2.4,3.84c.32.29.56.5.71.65a14.61,14.61,0,0,1,3.12,3.74,7.84,7.84,0,0,1,.87,3.71,6.72,6.72,0,0,1-1.92,5,7,7,0,0,1-5.13,1.88,10.33,10.33,0,0,1-2.12-.23,12.78,12.78,0,0,1-2.22-.68Z" transform="translate(0.04 0)"/></g>
+                <g id="SHI"><rect class="cls-2" x="0.04" width="283.46" height="213.13"/><path class="cls-3" d="M0,167.55q8.58,9.73,16.91,14.55a33,33,0,0,0,16.63,4.82q7.71,0,12.67-4.14a13.1,13.1,0,0,0,5-10.5q0-7-4.29-10.84t-19.42-7.85q-18.66-5-27.47-12.8Z" transform="translate(0.04 0)"/><path class="cls-3" d="M95.27,213.13V97.68H41.06q-6.94,0-11.28,3.32a10.29,10.29,0,0,0-4.34,8.53A10.49,10.49,0,0,0,29.25,118q3.81,3.18,14.7,6.07l1.73.48q23.51,6.36,30.94,14A34.45,34.45,0,0,1,84.23,151a47.67,47.67,0,0,1,2.6,16.14q0,22.45-14.75,36.09a48.14,48.14,0,0,1-16.23,9.88Z" transform="translate(0.04 0)"/><rect class="cls-3" x="133.77" y="155.7" width="51.28" height="57.43"/><path class="cls-3" d="M283.46,47.75a22.75,22.75,0,1,1,0-23.71V0H0L0,84.75Q1.44,83,3.13,81.44,16.67,68.68,38.26,68.68h95.46v58.21H185V72h38.55V213.13h21.07V72h38.84Z" transform="translate(0.04 0)"/></g>
+            </svg>
+            <div class="header-title">
+                <span>Analytics Platform</span>
+                <h1>Pricing & Margin Optimizer</h1>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('overview')">Overview</button>
+                <button class="nav-tab" onclick="switchTab('customers')">Customers</button>
+                <button class="nav-tab" onclick="switchTab('products')">Products</button>
+            </div>
+            <button class="btn btn-outline" onclick="exportData()">Export Excel</button>
+            <button class="btn btn-primary" onclick="newAnalysis()">+ Nieuwe Analyse</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h2>Pricing Intelligence Dashboard</h2>
+            <p>Real-time inzichten in prijzen, marges en klantsegmentatie</p>
+            <div class="date-range">
+                <strong>Periode:</strong> Januari 2024 - December 2025
+            </div>
+        </div>
+
+        <!-- Tab: Overview -->
+        <div id="overview-tab" class="tab-content active">
+        
+        <!-- Alert Banner -->
+        <div class="alert-banner">
+            <div class="alert-icon">▶</div>
+            <div class="alert-content">
+                <div class="alert-title">AI-Powered Inzicht</div>
+                <div class="alert-text">643 klanten geanalyseerd | 13 tabs met inzichten | Volledige transparantie via Excel export</div>
+            </div>
+            <button class="btn btn-outline" style="background: white;" onclick="exportData()">Download Excel</button>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Totale Omzet</div>
+                <div class="kpi-value" data-all="€ 103.9M" data-2024="€ 50.2M" data-2025="€ 53.7M">€ 103.9M</div>
+                <div class="kpi-change positive">
+                    <span>↑</span> +3.8% vs 2024
+                </div>
+            </div>
+            <div class="kpi-card highlight">
+                <div class="kpi-label">Gemiddelde Marge</div>
+                <div class="kpi-value" data-all="27.2%" data-2024="26.8%" data-2025="27.6%">27.2%</div>
+                <div class="kpi-change positive">
+                    <span>↑</span> +0.8pp vs 2024
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Actieve Klanten</div>
+                <div class="kpi-value" data-all="643" data-2024="635" data-2025="643">643</div>
+                <div class="kpi-change positive">
+                    <span>↑</span> +8 nieuwe klanten
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Product Categorieën</div>
+                <div class="kpi-value" data-all="6" data-2024="6" data-2025="6">6</div>
+                <div class="kpi-change">
+                    <span>→</span> Stabiel
+                </div>
+            </div>
+            <div class="kpi-card success">
+                <div class="kpi-label">Transacties</div>
+                <div class="kpi-value" data-all="111,071" data-2024="56,423" data-2025="54,648">111,071</div>
+                <div class="kpi-change negative">
+                    <span>↓</span> -1.7% volume (data cleaning)
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Top Customers Table - Preview -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Top Klanten by Revenue</h3>
+                    <div class="filter-pills">
+                        <span class="pill active" data-year="all">Alle jaren</span>
+                        <span class="pill" data-year="2024">2024</span>
+                        <span class="pill" data-year="2025">2025</span>
+                    </div>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Klant</th>
+                                <th>Revenue</th>
+                                <th>Volume</th>
+                                <th>Avg. Marge</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customer-table-preview">
+                            <tr>
+                                <td class="customer-name">Hornbach Bouwmarkt (Nederland) BV</td>
+                                <td class="amount">€ 4,287,432</td>
+                                <td>18,234</td>
+                                <td><span class="margin-badge high">28.4%</span></td>
+                                <td class="kpi-change positive">↑ +15%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Hornbach BauMarkt AG</td>
+                                <td class="amount">€ 3,891,120</td>
+                                <td>15,892</td>
+                                <td><span class="margin-badge high">26.1%</span></td>
+                                <td class="kpi-change positive">↑ +8%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Hubo</td>
+                                <td class="amount">€ 2,456,780</td>
+                                <td>12,456</td>
+                                <td><span class="margin-badge medium">19.8%</span></td>
+                                <td class="kpi-change positive">↑ +5%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">E-Commerce</td>
+                                <td class="amount">€ 2,134,560</td>
+                                <td>8,921</td>
+                                <td><span class="margin-badge high">31.2%</span></td>
+                                <td class="kpi-change positive">↑ +22%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Bol.com BV</td>
+                                <td class="amount">€ 1,987,340</td>
+                                <td>7,654</td>
+                                <td><span class="margin-badge medium">18.5%</span></td>
+                                <td class="kpi-change positive">↑ +12%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding: 1rem; text-align: center; border-top: 1px solid var(--shi-gray-border);">
+                    <button class="btn btn-outline" onclick="switchTab('customers')" style="width: 100%;">Bekijk alle klanten →</button>
+                </div>
+            </div>
+
+            <!-- Product Groups - Preview -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Product Groepen</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <ul class="product-list">
+                        <li class="product-item">
+                            <div class="product-info">
+                                <div class="product-icon" style="background: var(--shi-red-light); color: var(--shi-red); font-weight: bold;">H</div>
+                                <div>
+                                    <div class="product-name">Hardware</div>
+                                    <div class="product-count">34,521 items</div>
+                                </div>
+                            </div>
+                            <div class="product-revenue">
+                                <div class="amount">€ 8.2M</div>
+                                <div class="percentage">33% van totaal</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 33%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="product-item">
+                            <div class="product-info">
+                                <div class="product-icon" style="background: var(--shi-red-light); color: var(--shi-red); font-weight: bold;">E</div>
+                                <div>
+                                    <div class="product-name">Electronics</div>
+                                    <div class="product-count">28,934 items</div>
+                                </div>
+                            </div>
+                            <div class="product-revenue">
+                                <div class="amount">€ 6.4M</div>
+                                <div class="percentage">26% van totaal</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 26%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="product-item">
+                            <div class="product-info">
+                                <div class="product-icon" style="background: var(--shi-red-light); color: var(--shi-red); font-weight: bold;">G</div>
+                                <div>
+                                    <div class="product-name">Garden</div>
+                                    <div class="product-count">21,456 items</div>
+                                </div>
+                            </div>
+                            <div class="product-revenue">
+                                <div class="amount">€ 4.8M</div>
+                                <div class="percentage">19% van totaal</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 19%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="product-item">
+                            <div class="product-info">
+                                <div class="product-icon" style="background: var(--shi-red-light); color: var(--shi-red); font-weight: bold;">HL</div>
+                                <div>
+                                    <div class="product-name">Home & Living</div>
+                                    <div class="product-count">15,234 items</div>
+                                </div>
+                            </div>
+                            <div class="product-revenue">
+                                <div class="amount">€ 3.2M</div>
+                                <div class="percentage">13% van totaal</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 13%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div style="padding: 1rem; text-align: center; border-top: 1px solid var(--shi-gray-border);">
+                    <button class="btn btn-outline" onclick="switchTab('products')" style="width: 100%;">Bekijk alle producten →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights -->
+        <div class="dashboard-header" style="margin-top: 1rem;">
+            <h2>AI-Powered Inzichten</h2>
+            <p>Automatisch gegenereerde aanbevelingen op basis van uw data</p>
+        </div>
+
+        <div class="insights-grid">
+            <div class="insight-card">
+                <div class="insight-icon">▲</div>
+                <div class="insight-title">Customer Segmentatie</div>
+                <div class="insight-text">
+                    643 klanten verdeeld over 5 segmenten (A t/m E). Strategic klanten (>€1M) vertegenwoordigen 
+                    de hoogste omzet. Analyseer per segment in Tab 5 voor targeted pricing strategies.
+                </div>
+            </div>
+            <div class="insight-card gold">
+                <div class="insight-icon">★</div>
+                <div class="insight-title">Year-over-Year Growth</div>
+                <div class="insight-text">
+                    2025 toont +3.8% revenue groei vs 2024 met een verbetering in gemiddelde marge van +0.8pp. 
+                    Bekijk Tab 7-9 voor gedetailleerde YoY trends per klant en product groep.
+                </div>
+            </div>
+            <div class="insight-card">
+                <div class="insight-icon">●</div>
+                <div class="insight-title">Product Mix Optimalisatie</div>
+                <div class="insight-text">
+                    6 product groepen met 17,906 unieke producten. Top 100 producten (Tab 10) drijven 
+                    significant volume. Customer-Product matrix (Tab 12) toont cross-sell opportuniteiten.
+                </div>
+            </div>
+        </div>
+        
+        </div> <!-- End Overview Tab -->
+
+        <!-- Tab: Customers -->
+        <div id="customers-tab" class="tab-content">
+            <div class="dashboard-header">
+                <h2>Customer Analysis</h2>
+                <p>Gedetailleerde analyse van klantprestaties en segmentatie</p>
+            </div>
+
+            <!-- Top Customers Full View -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Top Klanten by Revenue</h3>
+                    <div class="filter-pills">
+                        <span class="pill active" data-year="all">Alle jaren</span>
+                        <span class="pill" data-year="2024">2024</span>
+                        <span class="pill" data-year="2025">2025</span>
+                    </div>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Klant</th>
+                                <th>Revenue</th>
+                                <th>Volume</th>
+                                <th>Avg. Marge</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customer-table-body">
+                            <tr>
+                                <td class="customer-name">Hornbach Bouwmarkt (Nederland) BV</td>
+                                <td class="amount">€ 4,287,432</td>
+                                <td>18,234</td>
+                                <td><span class="margin-badge high">28.4%</span></td>
+                                <td class="kpi-change positive">↑ +15%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Hornbach BauMarkt AG</td>
+                                <td class="amount">€ 3,891,120</td>
+                                <td>15,892</td>
+                                <td><span class="margin-badge high">26.1%</span></td>
+                                <td class="kpi-change positive">↑ +8%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Hubo</td>
+                                <td class="amount">€ 2,456,780</td>
+                                <td>12,456</td>
+                                <td><span class="margin-badge medium">19.8%</span></td>
+                                <td class="kpi-change positive">↑ +5%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">E-Commerce</td>
+                                <td class="amount">€ 2,134,560</td>
+                                <td>8,921</td>
+                                <td><span class="margin-badge high">31.2%</span></td>
+                                <td class="kpi-change positive">↑ +22%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Bol.com BV</td>
+                                <td class="amount">€ 1,987,340</td>
+                                <td>7,654</td>
+                                <td><span class="margin-badge medium">18.5%</span></td>
+                                <td class="kpi-change positive">↑ +12%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Bauhaus Nederland CV</td>
+                                <td class="amount">€ 1,765,210</td>
+                                <td>6,789</td>
+                                <td><span class="margin-badge medium">21.3%</span></td>
+                                <td class="kpi-change negative">↓ -3%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Bouwmaat Nederland BV</td>
+                                <td class="amount">€ 1,543,890</td>
+                                <td>5,432</td>
+                                <td><span class="margin-badge low">14.2%</span></td>
+                                <td class="kpi-change negative">↓ -7%</td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">PontMeyer Handelsbedrijven BV</td>
+                                <td class="amount">€ 1,234,560</td>
+                                <td>4,567</td>
+                                <td><span class="margin-badge high">24.7%</span></td>
+                                <td class="kpi-change positive">↑ +4%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customer Segments -->
+            <div class="dashboard-header" style="margin-top: 2rem;">
+                <h2>Customer Segmentation</h2>
+                <p>Klanten ingedeeld op basis van omzet en strategisch belang</p>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card highlight">
+                    <div class="kpi-label">Segment A - Strategic</div>
+                    <div class="kpi-value">15 klanten</div>
+                    <div class="kpi-change positive">
+                        <span>€</span> >€1M omzet
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Segment B - Major</div>
+                    <div class="kpi-value">42 klanten</div>
+                    <div class="kpi-change">
+                        <span>€</span> €500K-€1M
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Segment C - Core</div>
+                    <div class="kpi-value">128 klanten</div>
+                    <div class="kpi-change">
+                        <span>€</span> €100K-€500K
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Segment D - Growth</div>
+                    <div class="kpi-value">234 klanten</div>
+                    <div class="kpi-change">
+                        <span>€</span> €25K-€100K
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Segment E - Emerging</div>
+                    <div class="kpi-value">224 klanten</div>
+                    <div class="kpi-change">
+                        <span>€</span> <€25K
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End Customers Tab -->
+
+        <!-- Tab: Products -->
+        <div id="products-tab" class="tab-content">
+            <div class="dashboard-header">
+                <h2>Product Analysis</h2>
+                <p>Inzichten in productgroepen, performance en marges</p>
+            </div>
+
+            <!-- Product Groups Full View -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Product Groepen Performance</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product Groep</th>
+                                <th>Items</th>
+                                <th>Revenue</th>
+                                <th>% van Totaal</th>
+                                <th>Avg. Marge</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="customer-name">Hardware</td>
+                                <td>34,521</td>
+                                <td class="amount">€ 8,234,567</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span>33%</span>
+                                        <div class="progress-bar" style="width: 100px; height: 6px;">
+                                            <div class="progress-fill" style="width: 33%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="margin-badge high">29.1%</span></td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Electronics</td>
+                                <td>28,934</td>
+                                <td class="amount">€ 6,456,789</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span>26%</span>
+                                        <div class="progress-bar" style="width: 100px; height: 6px;">
+                                            <div class="progress-fill" style="width: 26%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="margin-badge high">27.8%</span></td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Garden</td>
+                                <td>21,456</td>
+                                <td class="amount">€ 4,823,456</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span>19%</span>
+                                        <div class="progress-bar" style="width: 100px; height: 6px;">
+                                            <div class="progress-fill" style="width: 19%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="margin-badge medium">24.3%</span></td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Home & Living</td>
+                                <td>15,234</td>
+                                <td class="amount">€ 3,234,567</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span>13%</span>
+                                        <div class="progress-bar" style="width: 100px; height: 6px;">
+                                            <div class="progress-fill" style="width: 13%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="margin-badge high">26.7%</span></td>
+                            </tr>
+                            <tr>
+                                <td class="customer-name">Bevestigingsmaterialen</td>
+                                <td>12,512</td>
+                                <td class="amount">€ 2,234,567</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span>9%</span>
+                                        <div class="progress-bar" style="width: 100px; height: 6px;">
+                                            <div class="progress-fill" style="width: 9%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="margin-badge medium">22.5%</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="dashboard-header" style="margin-top: 2rem;">
+                <h2>Top 100 Producten</h2>
+                <p>Hoogst presterende producten op basis van omzet en volume</p>
+            </div>
+
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-icon">■</div>
+                    <div class="insight-title">High-Volume Products</div>
+                    <div class="insight-text">
+                        Top 100 producten genereren 42% van totale omzet. Focus op voorraadoptimalisatie 
+                        en pricing strategies voor deze key items om marges te maximaliseren.
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">▼</div>
+                    <div class="insight-title">Margin Opportunities</div>
+                    <div class="insight-text">
+                        23 producten in top 100 hebben marges <20%. Review pricing en sourcing costs 
+                        voor potentiële margin improvement van gemiddeld 3-5 percentage points.
+                    </div>
+                </div>
+                <div class="insight-card gold">
+                    <div class="insight-icon">◆</div>
+                    <div class="insight-title">Cross-Sell Potential</div>
+                    <div class="insight-text">
+                        Customer-Product matrix onthult 156 cross-sell opportuniteiten waarbij klanten 
+                        vergelijkbare productgroepen kopen maar specifieke items missen.
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End Products Tab -->
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2024-2025 SHI non-food concepts | Pricing & Margin Optimizer Dashboard | Powered by Claude AI</p>
+    </footer>
+
+    <script>
+        // Tab Switching Function
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Activate corresponding nav tab by finding the button with matching onclick
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                if (tab.getAttribute('onclick').includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Year Filter Function
+        function filterByYear(year) {
+            // Update KPI values based on year
+            document.querySelectorAll('.kpi-value').forEach(value => {
+                if (value.dataset[year]) {
+                    value.textContent = value.dataset[year];
+                }
+            });
+            
+            // Update active pill
+            document.querySelectorAll('.pill').forEach(pill => {
+                pill.classList.remove('active');
+                if (pill.dataset.year === year) {
+                    pill.classList.add('active');
+                }
+            });
+        }
+
+        // Interactive pills
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.pill').forEach(pill => {
+                pill.addEventListener('click', function() {
+                    const year = this.dataset.year;
+                    filterByYear(year);
+                });
+            });
+
+            // Animate progress bars on load
+            document.querySelectorAll('.progress-fill').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        });
+
+        // Export Data Function - Downloads the actual Excel file
+        function exportData() {
+            // Try to download the Excel file
+            const link = document.createElement('a');
+            link.href = 'SHI_Pricing_Dashboard_Excel.xlsx';
+            link.download = 'SHI_Pricing_Dashboard_Excel.xlsx';
+            
+            // Try to trigger download
+            link.click();
+            
+            // Also show modal with information
+            setTimeout(() => {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                `;
+                
+                const content = document.createElement('div');
+                content.style.cssText = `
+                    background: white;
+                    padding: 2rem;
+                    border-radius: 12px;
+                    max-width: 600px;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                `;
+                
+                content.innerHTML = `
+                    <h2 style="color: #e2231a; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">▼</span> Excel Export - SHI Pricing Analysis
+                    </h2>
+                    <p style="color: #666; margin-bottom: 1.5rem; line-height: 1.6;">
+                        Download gestart! Het complete Excel bestand met 13 tabs en alle formules bevat:
+                    </p>
+                    <div style="background: #f8f8f8; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-family: monospace; font-size: 0.85rem; word-wrap: break-word;">
+                        SHI_Pricing_Dashboard_Excel.xlsx
+                    </div>
+                    <div style="background: #e2231a10; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                        <strong style="color: #e2231a;">Inhoud:</strong>
+                        <ul style="margin: 0.5rem 0 0 1.5rem; color: #666; line-height: 1.8;">
+                            <li><strong>Tab 1:</strong> Originele Data (112,657 rijen met formules)</li>
+                            <li><strong>Tab 2:</strong> Data met Berekeningen</li>
+                            <li><strong>Tab 3:</strong> Dashboard KPIs</li>
+                            <li><strong>Tab 4:</strong> Top Klanten Analyse</li>
+                            <li><strong>Tab 5:</strong> Customer Segments (A-E)</li>
+                            <li><strong>Tab 6:</strong> Product Group Performance</li>
+                            <li><strong>Tab 7-9:</strong> Year-over-Year Trends</li>
+                            <li><strong>Tab 10:</strong> Top 100 Producten</li>
+                            <li><strong>Tab 11:</strong> Margin Analysis Detail</li>
+                            <li><strong>Tab 12:</strong> Customer-Product Matrix</li>
+                            <li><strong>Tab 13:</strong> Advanced Analytics</li>
+                        </ul>
+                    </div>
+                    <div style="background: #f5b80015; border-left: 3px solid #f5b800; padding: 1rem; margin-bottom: 1.5rem;">
+                        <strong style="color: #2e2a25;">Belangrijke notitie:</strong>
+                        <p style="color: #666; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                            Alle Excel formules en berekeningen zijn bewaard in het originele bestand. 
+                            U kunt alle cijfers traceren naar hun brondata en formules aanpassen voor custom analyses.
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: #e2231a;
+                        color: white;
+                        border: none;
+                        padding: 0.75rem 1.5rem;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        width: 100%;
+                    ">Sluiten</button>
+                `;
+                
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+                
+                // Close on background click
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }, 500);
+        }
+
+        // New Analysis Function
+        function newAnalysis() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white;
+                padding: 2rem;
+                border-radius: 12px;
+                max-width: 500px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            `;
+            
+            content.innerHTML = `
+                <h2 style="color: #e2231a; margin-bottom: 1rem;">Nieuwe Analyse Starten</h2>
+                <p style="color: #666; margin-bottom: 1.5rem; line-height: 1.6;">
+                    In de productie versie opent dit een Claude AI project met uw data voor custom analyses zoals:
+                </p>
+                <ul style="color: #666; margin: 0 0 1.5rem 1.5rem; line-height: 1.8;">
+                    <li>Custom pricing scenarios</li>
+                    <li>Margin optimization strategieën</li>
+                    <li>Customer segmentation verfijning</li>
+                    <li>Product mix analyses</li>
+                    <li>Competitive positioning</li>
+                </ul>
+                <button onclick="this.parentElement.parentElement.remove()" style="
+                    background: #e2231a;
+                    color: white;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    width: 100%;
+                ">Sluiten</button>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
